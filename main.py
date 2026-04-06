@@ -14,7 +14,10 @@ from typing import Optional
 from vibe_core import create_base_context, get_recent_changes, CONTEXT_FILENAME
 from ai_bridge import update_context_via_ai, MissingAPIKeyError
 from hooks import install_hooks as _install_hooks
-from config import init_config, load_config, record_sync, get_last_synced
+from config import (
+    init_config, load_config, record_sync, get_last_synced,
+    set_gcs_bucket, set_google_project, set_cloud_run_url,
+)
 
 app = typer.Typer(
     name="vibe-sync",
@@ -92,7 +95,7 @@ def install_hooks():
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# NEW COMMANDS
+# STATUS, PUSH, MCP-TEST
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
@@ -156,7 +159,19 @@ def status():
     gcs = config.get("gcs_bucket")
     table.add_row(
         "GCS Bucket",
-        gcs if gcs else "[dim]Not configured[/dim]",
+        f"[green]{gcs}[/green]" if gcs else "[dim]Not configured[/dim]",
+    )
+
+    gcp_project = config.get("google_project_id")
+    table.add_row(
+        "GCP Project",
+        gcp_project if gcp_project else "[dim]Not configured[/dim]",
+    )
+
+    cr_url = config.get("cloud_run_url")
+    table.add_row(
+        "Cloud Run URL",
+        f"[blue]{cr_url}[/blue]" if cr_url else "[dim]Not deployed[/dim]",
     )
 
     console.print()
@@ -215,19 +230,182 @@ def mcp_test():
     console.print()
     if all_passed:
         console.print(Panel(
-            "[bold green]Status: Connected[/bold green]\n"
-            "All MCP checks passed. The server is ready for agent use.",
+            "[bold green]All MCP checks passed.[/bold green]\n"
+            "The server is ready for agent use.",
             title="✅ Result",
             border_style="green",
         ))
     else:
         console.print(Panel(
-            "[bold yellow]Status: Partially Connected[/bold yellow]\n"
-            "Some checks failed. Review the table above.",
+            "[bold yellow]Some checks failed.[/bold yellow]\n"
+            "Review the table above for details.",
             title="⚠️ Result",
             border_style="yellow",
         ))
     console.print()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# GOOGLE CLOUD COMMANDS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+@app.command("cloud-init")
+def cloud_init(
+    bucket: str = typer.Option(
+        ..., "--bucket", "-b",
+        help="GCS bucket name for remote context storage.",
+    ),
+    project: Optional[str] = typer.Option(
+        None, "--project", "-p",
+        help="Google Cloud project ID (auto-detected if omitted).",
+    ),
+):
+    """Configure Google Cloud Storage for cross-machine context sync."""
+    from deploy import get_current_project
+
+    with console.status("[bold cyan]Configuring GCS...[/bold cyan]"):
+        # Save bucket
+        set_gcs_bucket(bucket)
+
+        # Resolve project ID
+        project_id = project or get_current_project()
+        if project_id:
+            set_google_project(project_id)
+
+    console.print("[bold green]✅ Cloud storage configured![/bold green]")
+    console.print(f"  [dim]Bucket:[/dim]  [cyan]{bucket}[/cyan]")
+    if project_id:
+        console.print(f"  [dim]Project:[/dim] [cyan]{project_id}[/cyan]")
+    else:
+        console.print("  [dim]Project:[/dim] [yellow]Not detected — pass --project[/yellow]")
+    console.print()
+    console.print("[dim]Run [bold]vibe-sync cloud-push[/bold] to upload your context.[/dim]")
+
+
+@app.command("cloud-push")
+def cloud_push():
+    """Push VIBE_CONTEXT.md and metadata to Google Cloud Storage."""
+    config = load_config()
+    bucket = config.get("gcs_bucket")
+
+    if not bucket:
+        console.print(
+            "[bold red]❌ Error:[/bold red] No GCS bucket configured. "
+            "Run [bold]vibe-sync cloud-init --bucket <name>[/bold] first."
+        )
+        raise typer.Exit(code=1)
+
+    if not os.path.exists(CONTEXT_FILENAME):
+        console.print(
+            f"[bold red]❌ Error:[/bold red] {CONTEXT_FILENAME} not found. "
+            "Run [bold]vibe-sync init[/bold] first."
+        )
+        raise typer.Exit(code=1)
+
+    try:
+        from cloud import upload_context
+        with console.status("[bold magenta]Uploading to GCS...[/bold magenta]"):
+            result = upload_context(bucket)
+
+        console.print("[bold green]☁️  Pushed to GCS successfully![/bold green]")
+        for f in result["files_uploaded"]:
+            console.print(f"  [dim]📄 gs://{bucket}/{f}[/dim]")
+
+    except Exception as e:
+        console.print(f"[bold red]💥 GCS push failed:[/bold red] {str(e)}")
+        raise typer.Exit(code=1)
+
+
+@app.command("cloud-pull")
+def cloud_pull():
+    """Pull the latest VIBE_CONTEXT.md from Google Cloud Storage."""
+    config = load_config()
+    bucket = config.get("gcs_bucket")
+
+    if not bucket:
+        console.print(
+            "[bold red]❌ Error:[/bold red] No GCS bucket configured. "
+            "Run [bold]vibe-sync cloud-init --bucket <name>[/bold] first."
+        )
+        raise typer.Exit(code=1)
+
+    try:
+        from cloud import download_context
+        with console.status("[bold magenta]Downloading from GCS...[/bold magenta]"):
+            result = download_context(bucket)
+
+        console.print("[bold green]☁️  Pulled from GCS successfully![/bold green]")
+        for f in result["files_downloaded"]:
+            console.print(f"  [dim]📄 {f} ← gs://{bucket}/[/dim]")
+
+    except FileNotFoundError as e:
+        console.print(f"[bold red]❌ Not found:[/bold red] {str(e)}")
+        raise typer.Exit(code=1)
+    except Exception as e:
+        console.print(f"[bold red]💥 GCS pull failed:[/bold red] {str(e)}")
+        raise typer.Exit(code=1)
+
+
+@app.command()
+def deploy(
+    project: Optional[str] = typer.Option(
+        None, "--project", "-p",
+        help="Google Cloud project ID.",
+    ),
+    region: str = typer.Option(
+        "us-central1", "--region", "-r",
+        help="Cloud Run region.",
+    ),
+    service_name: str = typer.Option(
+        "vibe-sync-mcp", "--name", "-n",
+        help="Cloud Run service name.",
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run",
+        help="Print the deploy command without executing it.",
+    ),
+):
+    """Deploy the Vibe-Sync MCP server to Google Cloud Run."""
+    from deploy import deploy as run_deploy, check_gcloud_installed, get_current_project
+
+    if not check_gcloud_installed():
+        console.print(
+            "[bold red]❌ Error:[/bold red] gcloud CLI not found.\n"
+            "Install it from: https://cloud.google.com/sdk/docs/install"
+        )
+        raise typer.Exit(code=1)
+
+    # Resolve project ID
+    config = load_config()
+    project_id = project or config.get("google_project_id") or get_current_project()
+    if not project_id:
+        console.print(
+            "[bold red]❌ Error:[/bold red] No GCP project found. "
+            "Pass [bold]--project <id>[/bold] or run [bold]gcloud config set project <id>[/bold]."
+        )
+        raise typer.Exit(code=1)
+
+    gcs_bucket = config.get("gcs_bucket")
+
+    try:
+        service_url = run_deploy(
+            project_id=project_id,
+            region=region,
+            service_name=service_name,
+            gcs_bucket=gcs_bucket,
+            dry_run=dry_run,
+        )
+
+        if service_url and not dry_run:
+            # Save deployment info back to config
+            set_google_project(project_id)
+            set_cloud_run_url(service_url, region=region)
+            console.print("[dim]Config updated with deployment URL.[/dim]")
+
+    except RuntimeError as e:
+        console.print(f"[bold red]💥 Deployment failed:[/bold red] {str(e)}")
+        raise typer.Exit(code=1)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -1,12 +1,16 @@
 """
 Vibe-Sync MCP Server
 Exposes project context to AI agents via the Model Context Protocol.
+Supports both local filesystem and GCS-backed context reading.
 """
 
 import os
 from fastmcp import FastMCP
 
 CONTEXT_FILENAME = "VIBE_CONTEXT.md"
+
+# When deployed to Cloud Run, GCS_BUCKET env var enables cloud-backed reads
+GCS_BUCKET = os.environ.get("GCS_BUCKET")
 
 mcp = FastMCP(
     name="vibe-sync",
@@ -19,6 +23,27 @@ mcp = FastMCP(
 )
 
 
+def _read_context_content() -> str | None:
+    """Read VIBE_CONTEXT.md from GCS (if configured) or local filesystem."""
+    # Cloud mode: read from GCS bucket
+    if GCS_BUCKET:
+        try:
+            from cloud import read_context_from_gcs
+            content = read_context_from_gcs(GCS_BUCKET)
+            if content and "not found" not in content.lower():
+                return content
+        except Exception:
+            pass  # Fall through to local
+
+    # Local mode: search filesystem
+    context_path = _find_context_file()
+    if context_path:
+        with open(context_path, "r", encoding="utf-8") as f:
+            return f.read()
+
+    return None
+
+
 @mcp.tool()
 def get_latest_vibe() -> str:
     """
@@ -28,19 +53,21 @@ def get_latest_vibe() -> str:
     current state, architecture, progress, and next steps — without needing
     to explore the file tree.
     """
-    # Locate VIBE_CONTEXT.md — search cwd and common project roots
-    context_path = _find_context_file()
-    if context_path is None:
+    content = _read_context_content()
+    if content is None:
         return (
             "⚠️  VIBE_CONTEXT.md not found. "
             "Run `vibe-sync init` in your project directory first."
         )
 
-    with open(context_path, "r", encoding="utf-8") as f:
-        lines = f.readlines()
+    lines = content.splitlines(keepends=True)
 
     # --- Build the response ---
     sections: list[str] = []
+
+    # Source indicator
+    if GCS_BUCKET:
+        sections.append(f"[Source: gs://{GCS_BUCKET}]")
 
     # Full context summary (last 10 lines give the most recent state)
     tail = lines[-10:] if len(lines) > 10 else lines
@@ -70,15 +97,14 @@ def read_vibe() -> str:
     Use this as the FIRST action in a new session to load full project context
     in a single read, avoiding expensive file-tree exploration.
     """
-    context_path = _find_context_file()
-    if context_path is None:
+    content = _read_context_content()
+    if content is None:
         return (
             "⚠️  VIBE_CONTEXT.md not found. "
             "Run `vibe-sync init` in your project directory first."
         )
 
-    with open(context_path, "r", encoding="utf-8") as f:
-        return f.read()
+    return content
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────

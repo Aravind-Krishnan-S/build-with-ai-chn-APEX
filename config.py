@@ -23,6 +23,9 @@ DEFAULT_CONFIG = {
     "last_commit_message": None,
     "sync_count": 0,
     "gcs_bucket": None,
+    "google_project_id": None,
+    "cloud_run_url": None,
+    "cloud_run_region": None,
     "remote_sync_enabled": False,
 }
 
@@ -90,5 +93,23 @@ def set_gcs_bucket(bucket_name: str) -> dict:
     config = load_config()
     config["gcs_bucket"] = bucket_name
     config["remote_sync_enabled"] = True
+    _save_config(config)
+    return config
+
+
+def set_google_project(project_id: str) -> dict:
+    """Configure the Google Cloud project ID."""
+    config = load_config()
+    config["google_project_id"] = project_id
+    _save_config(config)
+    return config
+
+
+def set_cloud_run_url(url: str, region: Optional[str] = None) -> dict:
+    """Store the deployed Cloud Run service URL."""
+    config = load_config()
+    config["cloud_run_url"] = url
+    if region:
+        config["cloud_run_region"] = region
     _save_config(config)
     return config
