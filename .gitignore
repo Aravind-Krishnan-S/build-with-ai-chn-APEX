@@ -1,0 +1,13 @@
+# ----- Secrets & Environment -----
+.env
+
+# ----- Python bytecode -----
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ----- Vibe-Sync metadata (internal) -----
+.vibe/
+
+# ----- Keep VIBE_CONTEXT.md committed -----
+# (Do NOT ignore VIBE_CONTEXT.md — the Vibe stays with the repo)
