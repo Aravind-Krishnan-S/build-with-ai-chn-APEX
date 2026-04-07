@@ -19,8 +19,12 @@ graph TD
     style Archive fill:#1e1e2e,stroke:#f59e0b,stroke-width:2px,color:#fff
 ```
 
+![Vibe-Sync Terminal Demo](docs/assets/vibe_terminal_demo.png)
+
 ### **🛠️ Custom MCP Server (Personally Developed)**
 This project features a **bespoke Model Context Protocol (MCP) server integration**, designed and developed from the ground up to provide high-fidelity, low-latency context retrieval. It empowers agents with specialized tools like "Budget Mode" for extremely efficient project awareness with minimal token overhead.
+
+![Vibe-Sync MCP UI](docs/assets/vibe_mcp_ui.png)
 
 ### **🛡️ Multi-Tiered Inference Reliability**
 A robust four-stage fallback protocol that ensures continuous synchronization even during service outages or quota limits.
@@ -80,6 +84,8 @@ For deep-dive analysis, the **Vibe Bundle** synthesizes your entire workspace in
 | `vibe-sync push` | **Intelligence Transfer** | Injects the active project vibe into an agent's persistent memory. |
 | `vibe-sync bundle` | **Workspace Synthesis** | Compresses the entire project into an AI-optimized ingestion format. |
 | `vibe-sync install-hooks` | **Lifecycle Automation** | Deploys background triggers for automatic context updates. |
+
+![Vibe-Sync CLI Help](docs/assets/vibe_cli_help.png)
 
 ---
 
