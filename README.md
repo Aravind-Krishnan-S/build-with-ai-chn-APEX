@@ -37,6 +37,26 @@ graph LR
 
 ---
 
+## 🧬 Agentic Interoperability: Working Example
+
+Vibe-Sync acts as the **Contextual Memory Layer** for next-generation agents. Whether you are using **Antigravity**, **ClaudeCode**, or **Codex CLI**, Vibe-Sync ensures they all share the same "mental model" of your project.
+
+### **The "Cold Start" Solution**
+When a new agent session begins, the agent typically wastes thousands of tokens exploring the file tree. With Vibe-Sync:
+1.  **Antigravity** reads the local **Nexus** (`VIBE_CONTEXT.md`).
+2.  It instantly understands the **Active Goals**, **Hot Path**, and **Project Architecture**.
+3.  Execution begins immediately with 100% architectural alignment.
+
+```mermaid
+graph TD
+    VibeSync[Vibe-Sync Core] -->|Unified Context| Antigravity[Antigravity Agent]
+    VibeSync -->|Unified Context| ClaudeCode[ClaudeCode CLI]
+    VibeSync -->|Unified Context| Codex[Codex CLI]
+    style VibeSync fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
+```
+
+---
+
 ## 🌟 Core Features
 
 ### **🔒 Local-First Privacy (The Nexus)**
