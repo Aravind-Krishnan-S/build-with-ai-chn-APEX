@@ -3,19 +3,7 @@
 
 **Vibe-Sync** is a high-performance framework designed to solve the "context-drift" problem in modern AI-assisted development. By maintaining a persistent and synchronized **Source of Truth**, Vibe-Sync ensures that AI agents can "boot up" into any project with complete architectural clarity, minimizing token waste and maximizing productivity.
 
----
 
-## ⚖️ Hackathon Judging Matrix: Strategic Innovation
-
-| Criterion | Technology Impact | Implementation Detail |
-| :--- | :--- | :--- |
-| **Creativity** | **Neural Alignment** | Solves the "AI Cold-Start" problem via a persistent Context Nexus. |
-| **Complexity** | **Multi-Cloud Resilience** | 4-Tier Inference Cascade (**Vertex AI** / **Gemini** / **Groq** / **NIM**). |
-| **Integrations** | **Google Cloud Stack** | Seamless usage of **Vertex**, **GCS**, and **Cloud Run** for global sync. |
-| **Impact** | **Token Efficiency** | **~70% reduction** in prompt token costs through "Budget Mode." |
-| **Resilience** | **Lifecycle Automation** | Automated Git `post-commit` synchronization hooks. |
-
----
 
 ## 🏗️ Architecture: The Context Bridge
 
@@ -105,8 +93,8 @@ Vibe-Sync provides an executive-grade command suite for total project governance
 ---
 
 ### **🏆 Team Apex**
-- **Aravind Krishnan S** — *Lead Architect & MCP Core Developer*
-- **Pranav P** — *Systems Optimization Specialist*
+- **Aravind Krishnan S** 
+- **Pranav P** 
 
 ---
 © 2026 Team Apex. High-Performance Context Orchestration.
