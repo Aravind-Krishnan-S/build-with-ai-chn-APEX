@@ -9,5 +9,3 @@ google-cloud-storage
 uvicorn
 tiktoken
 groq
-openai
-# google-cloud-aiplatform  # Optional Add-on: pip install google-cloud-aiplatform

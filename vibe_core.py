@@ -31,14 +31,37 @@ def create_base_context() -> None:
         console.print(
             f"[bold yellow]⚠  {CONTEXT_FILENAME} already exists. Skipping creation.[/bold yellow]"
         )
-        return
+    else:
+        with open(CONTEXT_FILENAME, "w", encoding="utf-8") as f:
+            f.write(CONTEXT_TEMPLATE)
 
-    with open(CONTEXT_FILENAME, "w", encoding="utf-8") as f:
-        f.write(CONTEXT_TEMPLATE)
+        console.print(
+            f"[bold green]✅ Created {CONTEXT_FILENAME} successfully.[/bold green]"
+        )
 
-    console.print(
-        f"[bold green]✅ Created {CONTEXT_FILENAME} successfully.[/bold green]"
-    )
+    _ensure_gitignored()
+
+
+def _ensure_gitignored() -> None:
+    """Ensure VIBE_CONTEXT.md is included in .gitignore."""
+    gitignore_path = ".gitignore"
+    if not os.path.exists(gitignore_path):
+        with open(gitignore_path, "w", encoding="utf-8") as f:
+            f.write(f"{CONTEXT_FILENAME}\n")
+        console.print(f"[dim]Added {CONTEXT_FILENAME} to .gitignore[/dim]")
+    else:
+        with open(gitignore_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Simple check: if the filename isn't in the file, append it.
+        # (A more robust check could look line by line, but string matching is usually sufficient here).
+        if CONTEXT_FILENAME not in content:
+            with open(gitignore_path, "a", encoding="utf-8") as f:
+                # Ensure we start on a new line
+                if content and not content.endswith("\n"):
+                    f.write("\n")
+                f.write(f"\n# Ignore VIBE_CONTEXT.md as it may contain sensitive data\n{CONTEXT_FILENAME}\n")
+            console.print(f"[dim]Added {CONTEXT_FILENAME} to .gitignore[/dim]")
 
 
 def get_recent_changes() -> str:
@@ -77,7 +100,15 @@ def get_recent_changes() -> str:
     commits = list(repo.iter_commits(max_count=1))
     if commits:
         last = commits[0]
-        last_diff = repo.git.diff(f"{last.hexsha}~1", last.hexsha, _ok_code=[0, 128])
+        try:
+            last_diff = repo.git.diff(f"{last.hexsha}~1", last.hexsha)
+        except git.exc.GitCommandError as e:
+            # If there is no previous commit, diff against empty tree
+            try:
+                last_diff = repo.git.show(last.hexsha, "--format=")
+            except git.exc.GitCommandError:
+                last_diff = ""
+                
         sections.append(
             f"## Last Commit\n"
             f"- **Hash:** {last.hexsha[:8]}\n"

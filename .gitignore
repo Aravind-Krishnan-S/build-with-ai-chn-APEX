@@ -9,5 +9,7 @@ __pycache__/
 # ----- Vibe-Sync metadata (internal) -----
 .vibe/
 
-# ----- Keep VIBE_CONTEXT.md committed -----
-# (Do NOT ignore VIBE_CONTEXT.md — the Vibe stays with the repo)
+# ----- Keep VIBE_CONTEXT.md ignored -----
+# (Do NOT commit VIBE_CONTEXT.md — it may contain sensitive data)
+VIBE_CONTEXT.md
+vibe_bundle.md

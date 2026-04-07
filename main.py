@@ -94,6 +94,63 @@ def install_hooks():
     _install_hooks()
 
 
+@app.command("bundle")
+def bundle(
+    output: str = typer.Option(
+        "vibe_bundle.md", "--output", "-o",
+        help="The output markdown file for the project bundle."
+    ),
+):
+    """Bundle the entire project source code into a single Markdown file for AI upload."""
+    with console.status("[bold cyan]Bundling project files...[/bold cyan]"):
+        try:
+            with open(output, "w", encoding="utf-8") as out:
+                out.write("# 📦 VIBE-SYNC PROJECT BUNDLE\n\n")
+                
+                # Optionally add the current vibe context first
+                if os.path.exists(CONTEXT_FILENAME):
+                    with open(CONTEXT_FILENAME, "r", encoding="utf-8") as f:
+                        out.write("## Current Vibe Context\n\n")
+                        out.write(f.read())
+                        out.write("\n\n---\n\n")
+                
+                out.write("## Source Code\n\n")
+                
+                for root, dirs, files in os.walk("."):
+                    # Ignore .git, .vibe, __pycache__, etc.
+                    dirs[:] = [d for d in dirs if not d.startswith(".") and d != "__pycache__"]
+                    
+                    for file in files:
+                        # Ignore binary/compiled and hidden files
+                        if file.startswith(".") or file.endswith((".pyc", ".pyo", ".pyd", ".png", ".jpg", ".jpeg", ".gif", ".exe", ".dll", ".so", ".log", ".lock")):
+                            continue
+                            
+                        # Avoid saving the output file into itself if it happens to be included
+                        if file == output:
+                            continue
+                            
+                        file_path = os.path.join(root, file)
+                        rel_path = os.path.relpath(file_path, ".")
+                        
+                        try:
+                            with open(file_path, "r", encoding="utf-8") as f:
+                                content = f.read()
+                            
+                            out.write(f"### File: `{rel_path}`\n")
+                            out.write(f"```python\n" if file.endswith(".py") else "```\n")
+                            out.write(f"{content}\n```\n\n")
+                        except Exception:
+                            # Skip binary files that slip through or unreadable files
+                            pass
+                            
+        except Exception as e:
+            console.print(f"[bold red]💥 Error bundling project:[/bold red] {str(e)}")
+            raise typer.Exit(code=1)
+            
+    console.print(f"[bold green]✅ Project successfully bundled to {output}[/bold green]")
+
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # STATUS, PUSH, MCP-TEST
 # ═══════════════════════════════════════════════════════════════════════════════
