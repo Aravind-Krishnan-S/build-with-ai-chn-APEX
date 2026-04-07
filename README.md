@@ -5,6 +5,18 @@
 
 ---
 
+## ⚖️ Hackathon Judging Matrix: Strategic Innovation
+
+| Criterion | Technology Impact | Implementation Detail |
+| :--- | :--- | :--- |
+| **Creativity** | **Neural Alignment** | Solves the "AI Cold-Start" problem via a persistent Context Nexus. |
+| **Complexity** | **Multi-Cloud Resilience** | 4-Tier Inference Cascade (**Vertex AI** / **Gemini** / **Groq** / **NIM**). |
+| **Integrations** | **Google Cloud Stack** | Seamless usage of **Vertex**, **GCS**, and **Cloud Run** for global sync. |
+| **Impact** | **Token Efficiency** | **~70% reduction** in prompt token costs through "Budget Mode." |
+| **Resilience** | **Lifecycle Automation** | Automated Git `post-commit` synchronization hooks. |
+
+---
+
 ## 🏗️ Architecture: The Context Bridge
 
 Vibe-Sync creates a seamless link between your development environment and your AI collaborators, ensuring that every strategic decision and milestone is captured and preserved.
@@ -26,18 +38,20 @@ This project features a **bespoke Model Context Protocol (MCP) server integratio
 
 ![Vibe-Sync MCP UI](docs/assets/vibe_mcp_ui.png)
 
-### **🛡️ Multi-Tiered Inference Reliability**
-A robust four-stage fallback protocol that ensures continuous synchronization even during service outages or quota limits.
+---
 
-```mermaid
-graph LR
-    Sync[Sync Trigger] --> GCP[Enterprise Tier]
-    GCP -- Fallback --> Gemini[Core Tier]
-    Gemini -- Fallback --> Llama[High-Efficiency Tier]
-    Llama -- Fallback --> NIM[Resilience Tier]
-    NIM --> Success((Context Synced))
-    style Success fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff
-```
+## ☁️ Google Cloud Intelligence Stack
+
+Vibe-Sync is built upon the robust foundation of **Google Cloud**, leveraging its enterprise-grade AI and infrastructure for total reliability.
+
+### **1. Core Reasoning Engines (Gemini & Vertex AI)**
+Vibe-Sync uses **Gemini (AI Studio)** as its primary reasoning engine for rapid context synthesis. For high-stakes architectural analysis, it leverages **Vertex AI**, providing an enterprise-grade inference layer with superior resilience.
+
+### **2. Global Context Telepathy (Google Cloud Storage)**
+By using **Google Cloud Storage (GCS)**, Vibe-Sync achieves cross-device "telepathy." Developers can synchronize their project context across different machines and sessions, ensuring that the project's "vibe" is never lost.
+
+### **3. Serverless Context Hub (Google Cloud Run)**
+The Vibe-Sync MCP server is deployed to **Google Cloud Run**, providing a high-availability, serverless endpoint for AI agents to query project state from anywhere in the world.
 
 ---
 
@@ -46,7 +60,7 @@ graph LR
 Vibe-Sync acts as the **Contextual Memory Layer** for next-generation agents. Whether you are using **Antigravity**, **ClaudeCode**, or **Codex CLI**, Vibe-Sync ensures they all share the same "mental model" of your project.
 
 ### **The "Cold Start" Solution**
-When a new agent session begins, the agent typically wastes thousands of tokens exploring the file tree. With Vibe-Sync:
+When a new agent session begins, Vibe-Sync provides instant workspace awareness:
 1.  **Antigravity** reads the local **Nexus** (`VIBE_CONTEXT.md`).
 2.  It instantly understands the **Active Goals**, **Hot Path**, and **Project Architecture**.
 3.  Execution begins immediately with 100% architectural alignment.
@@ -61,29 +75,30 @@ graph TD
 
 ---
 
-## 🌟 Core Features
-
-### **🔒 Local-First Privacy (The Nexus)**
+## 🔒 Local-First Privacy (The Nexus)
 Your project's "vibe" is stored in `VIBE_CONTEXT.md`. This file serves as the local source of truth and is **never pushed to global repositories**. It remains on your local machine, serving as a secure, private bridge for your AI collaborators.
-
-### **🕰️ The Hidden Archive (.vibe/)**
-Vibe-Sync maintains a complete record of your project's evolution in the hidden `.vibe/` directory. Our **Adaptive Token Engines** periodically distill these granular logs into high-level milestones, maintaining a ~70% token efficiency gain for every new agent session.
-
-### **📦 The Vibe Bundle (Workspace Synthesis)**
-For deep-dive analysis, the **Vibe Bundle** synthesizes your entire workspace into a high-density, AI-optimized format for rapid ingestion, allowing agents to understand complex codebases in seconds.
 
 ---
 
-## 🛠️ Command Portfolio
+## 🛠️ Global Command Portfolio
 
-| Command | Operational Domain | Impact |
+Vibe-Sync provides an executive-grade command suite for total project governance.
+
+### **Standard Protocols**
+| Command | Focus | Impact |
 | :--- | :--- | :--- |
-| `vibe-sync init` | **Sovereignty Initialization** | Deploys the local context core and internal metadata audit. |
-| `vibe-sync commit` | **Neural Synchronization** | Portals project changes into the Nexus via the Inference Cascade. |
-| `vibe-sync status` | **State Diagnostic** | Provides an executive overview of context health and telemetry. |
-| `vibe-sync push` | **Intelligence Transfer** | Injects the active project vibe into an agent's persistent memory. |
-| `vibe-sync bundle` | **Workspace Synthesis** | Compresses the entire project into an AI-optimized ingestion format. |
-| `vibe-sync install-hooks` | **Lifecycle Automation** | Deploys background triggers for automatic context updates. |
+| `vibe-sync init` | **Setup** | Initializes the local context core and metadata audit. |
+| `vibe-sync commit` | **Sync** | Portals recent changes into the Nexus via the Inference Cascade. |
+| `vibe-sync status` | **Audit** | Summarizes current project health and context telemetry. |
+| `vibe-sync bundle` | **Synthesis** | Generates a high-density, AI-ready snapshot of the codebase. |
+
+### **☁️ Google Cloud Ecosystem Commands**
+| Command | Operational Domain | Google Product Integration |
+| :--- | :--- | :--- |
+| `vibe-sync cloud-init` | **Infrastructure** | Configures **Google Cloud Storage** for cross-machine sync. |
+| `vibe-sync cloud-push` | **Persistence** | Securely portals local context to your GCS Bucket. |
+| `vibe-sync cloud-pull` | **Retrieval** | Synchronizes the latest context from GCS to your local machine. |
+| `vibe-sync deploy` | **Deployment** | Deploys the Vibe-Sync MCP server to **Google Cloud Run**. |
 
 ![Vibe-Sync CLI Help](docs/assets/vibe_cli_help.png)
 
